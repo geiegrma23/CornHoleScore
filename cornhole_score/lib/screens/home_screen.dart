@@ -7,38 +7,44 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool knockbackEnabled = false;
+  bool knockbackRule = false;
+
+  void toggleKnockbackRule(bool value) {
+    setState(() {
+      knockbackRule = value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cornhole Score App'),
+        title: Text('Cornhole Scoring App'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: Center(
         child: Column(
-          children: <Widget>[
-            SwitchListTile(
-              title: Text('Enable Knockback'),
-              value: knockbackEnabled,
-              onChanged: (bool value) {
-                setState(() {
-                  knockbackEnabled = value;
-                });
-              },
-            ),
-            SizedBox(height: 20),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QuickGameScreen(),
+                    builder: (context) => QuickGameScreen(knockbackRule: knockbackRule),
                   ),
                 );
               },
               child: Text('Quick Game'),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Knockback Rule'),
+                Switch(
+                  value: knockbackRule,
+                  onChanged: toggleKnockbackRule,
+                ),
+              ],
             ),
           ],
         ),

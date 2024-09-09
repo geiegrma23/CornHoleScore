@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'game_play_screen.dart';
 
 class QuickGameScreen extends StatefulWidget {
+  final bool knockbackRule;  // Accept the knockback rule from HomeScreen
+
+  QuickGameScreen({required this.knockbackRule});  // Constructor
+
   @override
   _QuickGameScreenState createState() => _QuickGameScreenState();
 }
@@ -9,7 +13,6 @@ class QuickGameScreen extends StatefulWidget {
 class _QuickGameScreenState extends State<QuickGameScreen> {
   final TextEditingController teamAController = TextEditingController();
   final TextEditingController teamBController = TextEditingController();
-  bool knockbackRule = false;
 
   void _startGame() {
     if (teamAController.text.isNotEmpty && teamBController.text.isNotEmpty) {
@@ -19,7 +22,7 @@ class _QuickGameScreenState extends State<QuickGameScreen> {
           builder: (context) => GamePlayScreen(
             teamAName: teamAController.text,
             teamBName: teamBController.text,
-            knockbackRule: knockbackRule,
+            knockbackRule: widget.knockbackRule,  // Pass the knockback rule to GamePlayScreen
           ),
         ),
       );
@@ -48,21 +51,6 @@ class _QuickGameScreenState extends State<QuickGameScreen> {
               controller: teamBController,
               decoration: InputDecoration(labelText: 'Team B Name'),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Switch(
-                  value: knockbackRule,
-                  onChanged: (value) {
-                    setState(() {
-                      knockbackRule = value;
-                    });
-                  },
-                ),
-                Text('Enable Knockback Rule'),
-              ],
-            ),
-            SizedBox(height: 20),
             ElevatedButton(
               onPressed: _startGame,
               child: Text('Start Game'),
