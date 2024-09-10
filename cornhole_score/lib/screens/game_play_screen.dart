@@ -19,33 +19,31 @@ class GamePlayScreen extends StatefulWidget {
 class _GamePlayScreenState extends State<GamePlayScreen> {
   int teamAScore = 0;
   int teamBScore = 0;
+  int roundPointsA = 0;  // Total points for the round for Team A
+  int roundPointsB = 0;  // Total points for the round for Team B
+  int roundNumber = 1;  // Track the current round
 
-  // New lists to track individual bag scores for each team
-  List<int> teamABagScores = [0, 0, 0, 0];
-  List<int> teamBBagScores = [0, 0, 0, 0];
-
-  // Function to set points for each bag for Team A or B
-  void setBagScore(int team, int bagIndex, int points) {
+  // Function to handle scoring for Team A or Team B
+  void addPointsToRound(int team, int points) {
     setState(() {
       if (team == 0) {
-        teamABagScores[bagIndex] = points;
+        roundPointsA += points;
+        if (roundPointsA < 0) roundPointsA = 0;  // Ensure points don't go negative
+        if (roundPointsA > 12) roundPointsA = 12;  // Max points per round is 12
+        debugPrint('Team A Round Points: $roundPointsA');
       } else {
-        teamBBagScores[bagIndex] = points;
+        roundPointsB += points;
+        if (roundPointsB < 0) roundPointsB = 0;  // Ensure points don't go negative
+        if (roundPointsB > 12) roundPointsB = 12;  // Max points per round is 12
+        debugPrint('Team B Round Points: $roundPointsB');
       }
     });
   }
 
-  // Function to calculate the total score for the round
-  int calculateRoundScore(List<int> bagScores) {
-    return bagScores.fold(0, (prev, curr) => prev + curr);  // Sum of bag points
-  }
-
-  // Function to handle the end of a round
+  // Function to handle the end of the round
   void endRound() {
     setState(() {
-      int teamARoundScore = calculateRoundScore(teamABagScores);
-      int teamBRoundScore = calculateRoundScore(teamBBagScores);
-      int roundDifference = teamARoundScore - teamBRoundScore;
+      int roundDifference = roundPointsA - roundPointsB;
 
       if (roundDifference > 0) {
         // Team A wins the round
@@ -72,11 +70,68 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
         }
       }
 
+      // Check for winner before resetting round points
+      if (teamAScore >= 21 || teamBScore >= 21) {
+        _showWinnerDialog(teamAScore >= 21 ? widget.teamAName : widget.teamBName);
+        return;  // Stop further round processing
+      }
+
+      // Increment the round number
+      roundNumber++;
+
       // Reset round points for the next round
-      teamABagScores = [0, 0, 0, 0];
-      teamBBagScores = [0, 0, 0, 0];
+      roundPointsA = 0;
+      roundPointsB = 0;
       debugPrint('Round points reset.');
     });
+  }
+
+  // Dialog to show the winner
+  void _showWinnerDialog(String winner) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Congratulations!'),
+          content: Text('$winner wins!'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  teamAScore = 0;
+                  teamBScore = 0;
+                  roundNumber = 1;  // Reset round number when the game restarts
+                  roundPointsA = 0;
+                  roundPointsB = 0;
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text('Play Again'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => QuickGameScreen(
+                      knockbackRule: widget.knockbackRule,  // Pass the knockbackRule here
+                    ),
+                  ),
+                );
+              },
+              child: Text('New Teams'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+              child: Text('Quit'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -85,62 +140,69 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
       appBar: AppBar(
         title: Text('Game Play'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
+            // Display the round counter
+            Text('Round $roundNumber', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+
+            SizedBox(height: 10),
+
             // Display total scores for both teams
             Text('${widget.teamAName} Total Score: $teamAScore', style: TextStyle(fontSize: 24)),
             Text('${widget.teamBName} Total Score: $teamBScore', style: TextStyle(fontSize: 24)),
 
             SizedBox(height: 20),
 
-            // Display current round points for both teams (bag-by-bag)
-            Text('Current Round Points (Bag by Bag)', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-
-            // Team A bag scores
-            Text('${widget.teamAName} Bags: ${teamABagScores.join(", ")}'),
-            for (int i = 0; i < 4; i++)
-              Row(
-                children: [
-                  Text('Bag ${i + 1}:'),
-                  ElevatedButton(
-                    onPressed: () => setBagScore(0, i, 1),
-                    child: Text('On Board (+1)'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => setBagScore(0, i, 3),
-                    child: Text('In Hole (+3)'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => setBagScore(0, i, 0),
-                    child: Text('Miss (+0)'),
-                  ),
-                ],
-              ),
+            // Emphasize current round points section
+            Text('Current Round Points', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+            Text('${widget.teamAName}: $roundPointsA', style: TextStyle(fontSize: 22)),
+            Text('${widget.teamBName}: $roundPointsB', style: TextStyle(fontSize: 22)),
 
             SizedBox(height: 20),
 
-            // Team B bag scores
-            Text('${widget.teamBName} Bags: ${teamBBagScores.join(", ")}'),
-            for (int i = 0; i < 4; i++)
-              Row(
-                children: [
-                  Text('Bag ${i + 1}:'),
-                  ElevatedButton(
-                    onPressed: () => setBagScore(1, i, 1),
-                    child: Text('On Board (+1)'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => setBagScore(1, i, 3),
-                    child: Text('In Hole (+3)'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => setBagScore(1, i, 0),
-                    child: Text('Miss (+0)'),
-                  ),
-                ],
-              ),
+            // Buttons for Team A scoring
+            Text('${widget.teamAName} Scoring', style: TextStyle(fontSize: 20)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => addPointsToRound(0, -1),
+                  child: Text('-1'),
+                ),
+                ElevatedButton(
+                  onPressed: () => addPointsToRound(0, 1),
+                  child: Text('+1'),
+                ),
+                ElevatedButton(
+                  onPressed: () => addPointsToRound(0, 3),
+                  child: Text('+3'),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 20),
+
+            // Buttons for Team B scoring
+            Text('${widget.teamBName} Scoring', style: TextStyle(fontSize: 20)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => addPointsToRound(1, -1),
+                  child: Text('-1'),
+                ),
+                ElevatedButton(
+                  onPressed: () => addPointsToRound(1, 1),
+                  child: Text('+1'),
+                ),
+                ElevatedButton(
+                  onPressed: () => addPointsToRound(1, 3),
+                  child: Text('+3'),
+                ),
+              ],
+            ),
 
             SizedBox(height: 20),
 
