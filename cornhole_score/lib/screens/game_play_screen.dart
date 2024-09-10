@@ -19,46 +19,40 @@ class GamePlayScreen extends StatefulWidget {
 class _GamePlayScreenState extends State<GamePlayScreen> {
   int teamAScore = 0;
   int teamBScore = 0;
-  int roundPointsA = 0;  // Total points for the round for Team A
-  int roundPointsB = 0;  // Total points for the round for Team B
-  int roundNumber = 1;  // Track the current round
+  int roundPointsA = 0;
+  int roundPointsB = 0;
+  int roundNumber = 1;
 
-  // Function to handle scoring for Team A or Team B
   void addPointsToRound(int team, int points) {
     setState(() {
       if (team == 0) {
         roundPointsA += points;
-        if (roundPointsA < 0) roundPointsA = 0;  // Ensure points don't go negative
-        if (roundPointsA > 12) roundPointsA = 12;  // Max points per round is 12
+        if (roundPointsA < 0) roundPointsA = 0;
+        if (roundPointsA > 12) roundPointsA = 12;
         debugPrint('Team A Round Points: $roundPointsA');
       } else {
         roundPointsB += points;
-        if (roundPointsB < 0) roundPointsB = 0;  // Ensure points don't go negative
-        if (roundPointsB > 12) roundPointsB = 12;  // Max points per round is 12
+        if (roundPointsB < 0) roundPointsB = 0;
+        if (roundPointsB > 12) roundPointsB = 12;
         debugPrint('Team B Round Points: $roundPointsB');
       }
     });
   }
 
-  // Function to handle the end of the round
   void endRound() {
     setState(() {
       int roundDifference = roundPointsA - roundPointsB;
 
       if (roundDifference > 0) {
-        // Team A wins the round
         teamAScore += roundDifference;
         debugPrint('Team A wins round. New score: $teamAScore');
       } else if (roundDifference < 0) {
-        // Team B wins the round
         teamBScore += -roundDifference;
         debugPrint('Team B wins round. New score: $teamBScore');
       } else {
-        // Tied round, no score changes
         debugPrint('Round is tied. No score change.');
       }
 
-      // Apply knockback rule if necessary
       if (widget.knockbackRule) {
         if (teamAScore > 21) {
           teamAScore = 15;
@@ -70,23 +64,18 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
         }
       }
 
-      // Check for winner before resetting round points
       if (teamAScore >= 21 || teamBScore >= 21) {
         _showWinnerDialog(teamAScore >= 21 ? widget.teamAName : widget.teamBName);
-        return;  // Stop further round processing
+        return;
       }
 
-      // Increment the round number
       roundNumber++;
-
-      // Reset round points for the next round
       roundPointsA = 0;
       roundPointsB = 0;
       debugPrint('Round points reset.');
     });
   }
 
-  // Dialog to show the winner
   void _showWinnerDialog(String winner) {
     showDialog(
       context: context,
@@ -100,7 +89,7 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
                 setState(() {
                   teamAScore = 0;
                   teamBScore = 0;
-                  roundNumber = 1;  // Reset round number when the game restarts
+                  roundNumber = 1;
                   roundPointsA = 0;
                   roundPointsB = 0;
                 });
@@ -114,7 +103,7 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
                     builder: (context) => QuickGameScreen(
-                      knockbackRule: widget.knockbackRule,  // Pass the knockbackRule here
+                      knockbackRule: widget.knockbackRule,
                     ),
                   ),
                 );
@@ -144,39 +133,47 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
-            // Display the round counter
             Text('Round $roundNumber', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
 
             SizedBox(height: 10),
 
-            // Display total scores for both teams
-            Text('${widget.teamAName} Total Score: $teamAScore', style: TextStyle(fontSize: 24)),
-            Text('${widget.teamBName} Total Score: $teamBScore', style: TextStyle(fontSize: 24)),
+            Text('${widget.teamAName} Total Score: $teamAScore', style: const TextStyle(fontSize: 24, color: Colors.red)),
+            Text('${widget.teamBName} Total Score: $teamBScore', style: const TextStyle(fontSize: 24, color: Colors.blue)),
 
             SizedBox(height: 20),
 
-            // Emphasize current round points section
-            Text('Current Round Points', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-            Text('${widget.teamAName}: $roundPointsA', style: TextStyle(fontSize: 22)),
-            Text('${widget.teamBName}: $roundPointsB', style: TextStyle(fontSize: 22)),
+            const Text('Current Round Points', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+            Text('${widget.teamAName}: $roundPointsA', style: const TextStyle(fontSize: 22, color: Colors.red)),
+            Text('${widget.teamBName}: $roundPointsB', style: const TextStyle(fontSize: 22, color: Colors.blue)),
 
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-            // Buttons for Team A scoring
-            Text('${widget.teamAName} Scoring', style: TextStyle(fontSize: 20)),
+            Text('${widget.teamAName} Scoring', style: const TextStyle(fontSize: 20, color: Colors.red)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
                   onPressed: () => addPointsToRound(0, -1),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                  ),
                   child: Text('-1'),
                 ),
                 ElevatedButton(
                   onPressed: () => addPointsToRound(0, 1),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                  ),
                   child: Text('+1'),
                 ),
                 ElevatedButton(
                   onPressed: () => addPointsToRound(0, 3),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                  ),
                   child: Text('+3'),
                 ),
               ],
@@ -184,21 +181,32 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
 
             SizedBox(height: 20),
 
-            // Buttons for Team B scoring
-            Text('${widget.teamBName} Scoring', style: TextStyle(fontSize: 20)),
+            Text('${widget.teamBName} Scoring', style: TextStyle(fontSize: 20, color: Colors.blue)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
                   onPressed: () => addPointsToRound(1, -1),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
                   child: Text('-1'),
                 ),
                 ElevatedButton(
                   onPressed: () => addPointsToRound(1, 1),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
                   child: Text('+1'),
                 ),
                 ElevatedButton(
                   onPressed: () => addPointsToRound(1, 3),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
                   child: Text('+3'),
                 ),
               ],
@@ -206,9 +214,12 @@ class _GamePlayScreenState extends State<GamePlayScreen> {
 
             SizedBox(height: 20),
 
-            // End round button
             ElevatedButton(
               onPressed: endRound,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+              ),
               child: Text('End Round'),
             ),
           ],

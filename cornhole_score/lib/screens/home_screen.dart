@@ -29,6 +29,10 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                ),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -44,6 +48,10 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const Text('Knockback Rule'),
                 Switch(
+                  activeColor: Colors.black,        // The color of the switch thumb when ON
+                  activeTrackColor: Colors.red,    // The color of the switch track when ON
+                  inactiveThumbColor: Colors.white, // The color of the switch thumb when OFF
+                  inactiveTrackColor: Colors.grey,  // The color of the switch track when OFF
                   value: knockbackRule,
                   onChanged: toggleKnockbackRule,
                 ),
