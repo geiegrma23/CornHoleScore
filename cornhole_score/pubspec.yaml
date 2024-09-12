@@ -40,8 +40,8 @@ flutter:
   uses-material-design: true
 
   # Add assets and fonts configurations here if needed
-  # assets:
-  #   - assets/images/
+  assets:
+     - assets/background.jpg
   # fonts:
   #   - family: OpenSans
   #     fonts:
